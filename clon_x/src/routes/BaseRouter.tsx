@@ -1,6 +1,9 @@
 import {Navigate, Route, Routes} from "react-router-dom";
 import { HomePage } from "../pages/HomePage";
-import { LoginPage } from "../pages/LoginPage";
+import { NotificationsPage } from "../pages/NotificationsPage";
+import { ChatsPage } from "../pages/ChatsPage";
+import { HistoryPage } from "../pages/HistoryPage";
+import { ProfilePage } from "../pages/ProfilePage";
 
 export const BaseRouter = () => {
 
@@ -8,7 +11,11 @@ export const BaseRouter = () => {
         <>
         <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/chats" element={<ChatsPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         </>
