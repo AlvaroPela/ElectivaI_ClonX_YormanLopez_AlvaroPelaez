@@ -1,0 +1,18 @@
+[data-bs-theme="dark"] {
+  /* Fondo y texto */
+  --bs-body-bg: #B7AC70;
+  --bs-body-color: #e7e9ea;
+
+  /* Color principal (botones, enlaces) */
+  --bs-primary: #1d9bf0;
+  --bs-primary-rgb: 29, 155, 240;
+  --bs-link-color: #1d9bf0;
+  --bs-link-color-rgb: 29, 155, 240;
+
+  /* Bordes y texto secundario */
+  --bs-border-color: #2f3336;
+  --bs-secondary-color: #71767b;
+
+  /* Fuente */
+  --bs-body-font-family: "Inter", system-ui, sans-serif;
+}

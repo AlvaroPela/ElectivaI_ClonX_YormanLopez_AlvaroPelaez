@@ -1,3 +1,10 @@
 import { createContext } from "react";
+import type { AuthState } from "../types/authReducerInterfaces";
 
-export const AuthContext = createContext({});
+interface AuthContextProps {
+  authState: AuthState;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+}
+
+export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
