@@ -1,11 +1,14 @@
 export interface AuthState {
-logged: boolean;
-user: User | null;
+    logged: boolean;
+    user: User | null;
+    errorMessage: string | null;
 }
 
 export interface User {
-username: string;
-email: string;
+    uid: string,
+    email: string,
+    photoURL: string,
+    username: string,
 }
 
 export interface AuthReducerAction {
@@ -13,4 +16,4 @@ export interface AuthReducerAction {
     payload: AuthState;
 }
 
-export type ActionType = 'login' | 'logout';
+export type ActionType = 'login' | 'logout' | 'error';

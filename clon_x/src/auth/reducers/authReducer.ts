@@ -14,6 +14,12 @@ export const authReducer = (state: AuthState, action: AuthReducerAction) => {
                 ...state,
                 ...action.payload
             }
+        case "error":
+            return {
+                logged: false,
+                user: null,
+                errorMessage: action.payload.errorMessage
+            }
 
         default:
             return state;
