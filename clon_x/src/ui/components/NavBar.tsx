@@ -44,12 +44,12 @@ export const NavBar = () => {
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/Profile">
+              <NavLink className="nav-link" to="/profile">
                 Perfil
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/Notifications">
+              <NavLink className="nav-link" to="/notifications">
                 Notificaciones
               </NavLink>
             </li>
