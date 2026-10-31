@@ -1,0 +1,32 @@
+.brand {
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: 800;
+  color: #e7e9ea;
+}
+
+.title {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  margin-bottom: 2rem;
+}
+
+.subtitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  max-width: 320px;
+}
+
+.pill {
+  border-radius: 9999px;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+}
+
+.logo{
+    width: 50%;
+    max-width: 350 px;
+}
