@@ -5,6 +5,7 @@ import { ChatsPage } from "../pages/ChatsPage";
 import { HistoryPage } from "../pages/HistoryPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { LoginPage } from "../pages/LoginPage";
+import { RegisterForm } from "../pages/RegisterForm";
 
 export const BaseRouter = () => {
   return (
@@ -16,6 +17,8 @@ export const BaseRouter = () => {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterForm />} />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
