@@ -1,5 +1,5 @@
 import { useContext, useState, type FormEvent } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../auth/contexts/AuthContext";
 
 interface Post {
@@ -54,9 +54,10 @@ const trends = [
 ];
 
 export const HomePage = () => {
-  const { authState } = useContext(AuthContext);
+  const { authState, logout } = useContext(AuthContext);
   const [posts, setPosts] = useState(initialPosts);
   const [draft, setDraft] = useState("");
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const username = authState.user?.username || "Invitado";
   const initials = username.charAt(0).toUpperCase();
@@ -116,16 +117,66 @@ export const HomePage = () => {
             ))}
           </nav>
 
-          <div className="mt-auto d-flex align-items-center gap-2 py-3">
-            <div className="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: 42, height: 42 }}>
-              {initials}
-            </div>
-            <div className="overflow-hidden">
-              <div className="fw-bold text-truncate">{username}</div>
-              <div className="text-secondary small text-truncate">
-                {authState.user?.email || "@invitado"}
+          <div className="mt-auto position-relative w-100">
+            {accountMenuOpen && (
+              <div
+                className="position-absolute bottom-100 start-0 w-100 bg-black border border-secondary rounded-4 shadow mb-2 overflow-hidden"
+                role="menu"
+                aria-label="Opciones de cuenta"
+              >
+                {authState.logged ? (
+                  <>
+                    <Link
+                      to="/login"
+                      role="menuitem"
+                      className="btn text-white text-start w-100 rounded-0 p-3 border-bottom border-secondary"
+                      onClick={() => setAccountMenuOpen(false)}
+                    >
+                      Agregar una cuenta existente
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="btn text-white text-start w-100 rounded-0 p-3"
+                      onClick={() => {
+                        logout();
+                        setAccountMenuOpen(false);
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    role="menuitem"
+                    className="btn text-white text-start w-100 rounded-0 p-3"
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    Iniciar sesión
+                  </Link>
+                )}
               </div>
-            </div>
+            )}
+            <button
+              type="button"
+              className="btn text-white d-flex align-items-center gap-2 py-3 w-100 text-start"
+              aria-expanded={accountMenuOpen}
+              aria-haspopup="menu"
+              aria-label="Abrir opciones de cuenta"
+              onClick={() => setAccountMenuOpen((isOpen) => !isOpen)}
+            >
+              <span className="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: 42, height: 42 }}>
+                {initials}
+              </span>
+              <span className="overflow-hidden flex-grow-1">
+                <span className="d-block fw-bold text-truncate">{username}</span>
+                <span className="d-block text-secondary small text-truncate">
+                  {authState.user?.email || "@invitado"}
+                </span>
+              </span>
+              <span aria-hidden="true">···</span>
+            </button>
           </div>
         </aside>
 
