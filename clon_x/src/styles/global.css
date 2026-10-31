@@ -1,19 +1,21 @@
-[data-bs-theme="dark"] {
-  /* Fondo y texto */
-  --bs-body-bg: #000000;
-  --bs-body-color: #e7e9ea;
-  --bs-tertiary-bg: #16181c;
+/* Auth pages (login and register) */
+.auth-logo {
+  width: 60%;
+  max-width: 350px;
+}
 
-  /* Color principal (botones, enlaces) */
-  --bs-primary: #1d9bf0;
-  --bs-primary-rgb: 29, 155, 240;
-  --bs-link-color: #1d9bf0;
-  --bs-link-color-rgb: 29, 155, 240;
+.auth-title {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  margin-bottom: 2rem;
+}
 
-  /* Bordes y texto secundario */
-  --bs-border-color: #2f3336;
-  --bs-secondary-color: #71767b;
+.auth-form {
+  max-width: 320px;
+}
 
-  /* Fuente */
-  --bs-body-font-family: "Inter", system-ui, sans-serif;
+.btn-pill {
+  border-radius: 9999px;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
 }

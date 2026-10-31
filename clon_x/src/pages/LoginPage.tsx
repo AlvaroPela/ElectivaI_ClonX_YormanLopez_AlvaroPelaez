@@ -1,6 +1,6 @@
 import { useContext, useState, type ChangeEvent } from "react";
 import { AuthContext } from "../auth/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.css";
 import logo from "../assets/logo.png";
 
@@ -88,6 +88,9 @@ export const LoginPage = () => {
               >
                 Iniciar sesión
               </button>
+              <p className="mt-3 text-center">
+                        ¿Aun no tienes cuenta? <Link to="/register">Registrarse</Link>
+                      </p>
             </form>
           </div>
         </div>
