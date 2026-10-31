@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../auth/contexts/AuthContext";
 
@@ -8,9 +8,26 @@ export const ProfilePage = () => {
   const { authState } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState(profileTabs[0]);
   const user = authState.user;
-  const displayName = user?.username || "Invitado";
+  const [displayName, setDisplayName] = useState(user?.username || "Invitado");
+  const [bio, setBio] = useState("");
+  const [nameDraft, setNameDraft] = useState(displayName);
+  const [bioDraft, setBioDraft] = useState(bio);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const handle = user?.email ? `@${user.email.split("@")[0]}` : "@invitado";
   const initials = displayName.charAt(0).toUpperCase();
+
+  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const updatedName = nameDraft.trim();
+
+    if (!updatedName) {
+      return;
+    }
+
+    setDisplayName(updatedName);
+    setBio(bioDraft.trim());
+    setEditModalOpen(false);
+  };
 
   return (
     <main className="container-fluid">
@@ -49,12 +66,23 @@ export const ProfilePage = () => {
                 {initials}
               </div>
             )}
+            <button
+              type="button"
+              className="btn btn-outline-light rounded-pill fw-bold mt-3 ms-auto"
+              onClick={() => {
+                setNameDraft(displayName);
+                setBioDraft(bio);
+                setEditModalOpen(true);
+              }}
+            >
+              Editar perfil
+            </button>
           </div>
 
           <div className="px-3 pt-3 pb-3">
             <h2 className="fs-5 fw-bold mb-0">{displayName}</h2>
             <div className="text-secondary">{handle}</div>
-            <p className="mt-3 mb-2">Aún no has agregado una descripción.</p>
+            <p className="mt-3 mb-2">{bio || "Aún no has agregado una descripción."}</p>
             <div className="text-secondary small">
               <span className="me-3">📍 En X</span>
               <span>◷ Se unió recientemente</span>
@@ -98,6 +126,65 @@ export const ProfilePage = () => {
           </div>
         </section>
       </div>
+      {editModalOpen && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-75 d-flex align-items-center justify-content-center p-3"
+          style={{ zIndex: 1055 }}
+        >
+          <section
+            className="bg-black border border-secondary rounded-4 p-4 w-100"
+            style={{ maxWidth: 560 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-title"
+          >
+            <form onSubmit={saveProfile}>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 id="edit-profile-title" className="fs-5 fw-bold mb-0">
+                  Editar perfil
+                </h2>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  aria-label="Cerrar"
+                  onClick={() => setEditModalOpen(false)}
+                />
+              </div>
+              <label htmlFor="profile-name" className="form-label">
+                Nombre
+              </label>
+              <input
+                id="profile-name"
+                className="form-control bg-black text-white border-secondary mb-3"
+                maxLength={50}
+                value={nameDraft}
+                onChange={(event) => setNameDraft(event.target.value)}
+                required
+              />
+              <label htmlFor="profile-bio" className="form-label">
+                Biografía
+              </label>
+              <textarea
+                id="profile-bio"
+                className="form-control bg-black text-white border-secondary"
+                maxLength={160}
+                rows={3}
+                value={bioDraft}
+                onChange={(event) => setBioDraft(event.target.value)}
+              />
+              <div className="d-flex justify-content-end mt-4">
+                <button
+                  type="submit"
+                  className="btn btn-light rounded-pill fw-bold px-4"
+                  disabled={!nameDraft.trim()}
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </main>
   );
 };
