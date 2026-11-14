@@ -1,40 +1,90 @@
-import {FirebaseAuth} from "./config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { FirebaseAuth } from "./config";
 
-interface AuthResult {
-    ok:boolean;
-    uid: string;
-    email: string;
-    displayName: string | null;
-    photoURL: string | null;
+export interface AuthSuccess {
+  ok: true;
+  uid: string;
+  email: string;
+  displayName: string | null;
+  photoURL: string | null;
 }
 
-interface AuthErrorResult {
-    ok: boolean;
-    errorMessage: string;
+export interface AuthFailure {
+  ok: false;
+  errorMessage: string;
 }
 
-export const loginUserByCredentials = async (email: string, password: string) : Promise<AuthResult | AuthErrorResult> => {
-    try {
-        const result = await signInWithEmailAndPassword(FirebaseAuth, email, password);
+export type AuthResult = AuthSuccess | AuthFailure;
 
-        const user = result.user;
+const toAuthFailure = (error: unknown): AuthFailure => {
+  const messages: Record<string, string> = {
+    "auth/invalid-credential": "Correo o contraseña incorrectos.",
+    "auth/user-not-found": "No existe una cuenta con ese correo.",
+    "auth/wrong-password": "La contraseña es incorrecta.",
+    "auth/email-already-in-use": "Ya existe una cuenta con ese correo.",
+    "auth/weak-password": "La contraseña debe tener al menos 6 caracteres.",
+    "auth/invalid-email": "El correo electrónico no es válido.",
+    "auth/network-request-failed": "No se pudo conectar. Revisa tu conexión.",
+  };
+  const errorMessage =
+    error instanceof FirebaseError
+      ? messages[error.code] || error.message
+      : error instanceof Error
+        ? error.message
+        : "No se pudo completar la operación.";
 
-        const {uid, displayName, photoURL} = user;
+  return { ok: false, errorMessage };
+};
 
-        return {
-            ok: true,
-            uid,
-            email,
-            displayName,
-            photoURL
-        }
+export const loginUserByCredentials = async (
+  email: string,
+  password: string,
+): Promise<AuthResult> => {
+  try {
+    const { user } = await signInWithEmailAndPassword(
+      FirebaseAuth,
+      email,
+      password,
+    );
 
-    }catch (error: any) {
-        return {
-            ok:false,
-            errorMessage: error.message
-        };
-    }
+    return {
+      ok: true,
+      uid: user.uid,
+      email: user.email || email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    };
+  } catch (error) {
+    return toAuthFailure(error);
+  }
+};
 
-}
+export const registerUserByCredentials = async (
+  email: string,
+  password: string,
+  username: string,
+): Promise<AuthResult> => {
+  try {
+    const { user } = await createUserWithEmailAndPassword(
+      FirebaseAuth,
+      email,
+      password,
+    );
+    await updateProfile(user, { displayName: username });
+
+    return {
+      ok: true,
+      uid: user.uid,
+      email: user.email || email,
+      displayName: username,
+      photoURL: user.photoURL,
+    };
+  } catch (error) {
+    return toAuthFailure(error);
+  }
+};
