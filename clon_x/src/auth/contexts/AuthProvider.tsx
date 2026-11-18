@@ -19,6 +19,8 @@ import {
 } from "../../firebase/providers";
 import {
   ensureProfile,
+  isUsernameAvailable,
+  isValidUsername,
   normalizeUsername,
   saveProfile,
 } from "../../firebase/profiles";
@@ -82,6 +84,20 @@ const startSession = async (
       type: ACTION_TYPES.error,
       payload: getErrorMessage(error, "No se pudo cargar el perfil de Firestore."),
     });
+  }
+};
+
+// Returns an error message when the username can't be used, or null when it is free.
+const validateUsername = async (username: string): Promise<string | null> => {
+  if (!isValidUsername(username)) {
+    return "El usuario debe tener entre 3 y 15 caracteres: letras, números o guion bajo.";
+  }
+
+  try {
+    const available = await isUsernameAvailable(username);
+    return available ? null : "Ese nombre de usuario ya está en uso.";
+  } catch {
+    return "No se pudo validar el nombre de usuario. Inténtalo de nuevo.";
   }
 };
 
@@ -187,6 +203,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const register = async (data: RegisterData): Promise<boolean> => {
     dispatch({ type: ACTION_TYPES.loading });
+    const usernameError = await validateUsername(data.username);
+
+    if (usernameError) {
+      dispatch({ type: ACTION_TYPES.error, payload: usernameError });
+      return false;
+    }
 
     registeringRef.current = true;
     const created = await createAccount(data, dispatch);
