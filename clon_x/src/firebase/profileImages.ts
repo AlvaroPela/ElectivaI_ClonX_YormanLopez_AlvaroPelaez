@@ -1,48 +1,17 @@
-import { FirebaseApp } from "./config";
+import { resizeImage, type ResizeOptions } from "../posts/helpers/resizeImage";
 
 export type ProfileImageType = "avatar" | "cover";
 
-const maxImageSize = 5 * 1024 * 1024;
-const allowedImageTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
+// The avatar and the cover are saved in the same profile document, so together
+// they must stay below the 1 MB limit of a Firestore document.
+const imageSizes: Record<ProfileImageType, ResizeOptions> = {
+  avatar: { maxSide: 400, maxLength: 150_000 },
+  cover: { maxSide: 1080, maxLength: 600_000 },
+};
 
+// Firebase Storage needs the paid Blaze plan, so the profile images are made
+// smaller in the browser and returned as a data URL to save in Firestore.
 export const uploadProfileImage = async (
-  uid: string,
   type: ProfileImageType,
   file: File,
-  onProgress: (progress: number) => void,
-): Promise<string> => {
-  if (!allowedImageTypes.has(file.type)) {
-    throw new Error("Usa una imagen JPG, PNG, WEBP o GIF.");
-  }
-  if (file.size > maxImageSize) {
-    throw new Error("La imagen debe pesar 5 MB o menos.");
-  }
-
-  const storageApi = await import("firebase/storage");
-  const storage = storageApi.getStorage(FirebaseApp);
-  const imageRef = storageApi.ref(storage, `users/${uid}/${type}`);
-  const uploadTask = storageApi.uploadBytesResumable(imageRef, file, {
-    cacheControl: "no-cache",
-    contentType: file.type,
-  });
-
-  return new Promise((resolve, reject) => {
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        onProgress(
-          Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
-        );
-      },
-      reject,
-      () => {
-        storageApi.getDownloadURL(uploadTask.snapshot.ref).then(resolve, reject);
-      },
-    );
-  });
-};
+): Promise<string> => resizeImage(file, imageSizes[type]);
