@@ -10,7 +10,9 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { PostCard } from "../posts/components/PostCard";
 import { POST_MESSAGES } from "../posts/helpers/postMessages";
+import { Pagination } from "../ui/components/Pagination";
 import { SuccessToast } from "../ui/components/SuccessToast";
+import { paginate } from "../ui/helpers/paginate";
 import { XIcon } from "../ui/components/XIcon";
 
 const trends = [
@@ -42,7 +44,9 @@ export const HomePage = () => {
   const [suggestions, setSuggestions] = useState<Profile[]>([]);
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
   const [draft, setDraft] = useState("");
-  const [activeTab, setActiveTab] = useState<"for-you" | "following">("for-you");
+  // The feed starts with the posts of the user and the accounts they follow.
+  const [activeTab, setActiveTab] = useState<"for-you" | "following">("following");
+  const [page, setPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
   const [pageError, setPageError] = useState<string | null>(null);
@@ -69,6 +73,13 @@ export const HomePage = () => {
           ),
     [activeTab, followedIds, posts, user.uid],
   );
+  const feedPage = paginate(visiblePosts, page);
+
+  const changeTab = (tab: "for-you" | "following") => {
+    setActiveTab(tab);
+    setPage(1);
+  };
+
   const displayedError =
     pageError ||
     (authState.errorMessage
@@ -189,7 +200,7 @@ export const HomePage = () => {
               role="tab"
               aria-selected={activeTab === "for-you"}
               className={activeTab === "for-you" ? "selected" : ""}
-              onClick={() => setActiveTab("for-you")}
+              onClick={() => changeTab("for-you")}
             >
               Para ti
             </button>
@@ -198,7 +209,7 @@ export const HomePage = () => {
               role="tab"
               aria-selected={activeTab === "following"}
               className={activeTab === "following" ? "selected" : ""}
-              onClick={() => setActiveTab("following")}
+              onClick={() => changeTab("following")}
             >
               Siguiendo
             </button>
@@ -238,7 +249,7 @@ export const HomePage = () => {
         </form>
 
         <section className="x-post-list" aria-label="Publicaciones">
-          {visiblePosts.map((post) => (
+          {feedPage.items.map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
           {visiblePosts.length === 0 && (
@@ -248,6 +259,11 @@ export const HomePage = () => {
                 : "Todavía no hay publicaciones. ¡Sé el primero en publicar!"}
             </div>
           )}
+          <Pagination
+            page={feedPage.page}
+            totalPages={feedPage.totalPages}
+            onPageChange={setPage}
+          />
         </section>
       </main>
 
