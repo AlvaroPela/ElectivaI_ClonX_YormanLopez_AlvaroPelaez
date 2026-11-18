@@ -14,7 +14,7 @@ export interface AuthState {
 
 export type AuthReducerAction =
   | { type: "loading" }
-  | { type: "authenticated"; payload: AuthUser }
-  | { type: "unauthenticated" }
+  | { type: "login"; payload: AuthUser }
+  | { type: "logout" }
   | { type: "error"; payload: string }
   | { type: "clearError" };

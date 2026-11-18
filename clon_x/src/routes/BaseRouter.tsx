@@ -4,10 +4,11 @@ import { AuthContext } from "../auth/contexts/AuthContext";
 import { ChatsPage } from "../pages/ChatsPage";
 import { HistoryPage } from "../pages/HistoryPage";
 import { HomePage } from "../pages/HomePage";
-import { LoginPage } from "../pages/LoginPage";
+import { LoginPage } from "../auth/pages/LoginPage";
 import { NotificationsPage } from "../pages/NotificationsPage";
+import { NewPostPage } from "../posts/pages/NewPostPage";
 import { ProfilePage } from "../pages/ProfilePage";
-import { RegisterPage } from "../pages/RegisterPage";
+import { RegisterPage } from "../auth/pages/RegisterPage";
 
 const PrivateRoutes = () => {
   const { authState } = useContext(AuthContext);
@@ -44,6 +45,7 @@ export const BaseRouter = () => (
       <Route path="/chats" element={<ChatsPage />} />
       <Route path="/history" element={<HistoryPage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/new-post" element={<NewPostPage />} />
     </Route>
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
