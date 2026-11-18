@@ -11,6 +11,7 @@ import {
 } from "../../firebase/providers";
 import { ensureProfile, saveProfile } from "../../firebase/profiles";
 import { AuthContext, type RegisterData } from "./AuthContext";
+import { ACTION_TYPES } from "../reducers/actionTypes";
 import { authReducer } from "../reducers/authReducer";
 import type { AuthState, AuthUser } from "../types/authReducerInterfaces";
 
@@ -40,12 +41,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     return onAuthStateChanged(FirebaseAuth, async (firebaseUser) => {
       if (!firebaseUser) {
-        dispatch({ type: "unauthenticated" });
+        dispatch({ type: ACTION_TYPES.logout });
         return;
       }
 
       const user = toAuthUser(firebaseUser);
-      dispatch({ type: "authenticated", payload: user });
+      dispatch({ type: ACTION_TYPES.login, payload: user });
 
       try {
         await ensureProfile({
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
       } catch (error) {
         dispatch({
-          type: "error",
+          type: ACTION_TYPES.error,
           payload:
             error instanceof Error
               ? error.message
@@ -67,16 +68,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    dispatch({ type: "loading" });
+    dispatch({ type: ACTION_TYPES.loading });
     const result = await loginUserByCredentials(email, password);
 
     if (!result.ok) {
-      dispatch({ type: "error", payload: result.errorMessage });
+      dispatch({ type: ACTION_TYPES.error, payload: result.errorMessage });
       return false;
     }
 
     dispatch({
-      type: "authenticated",
+      type: ACTION_TYPES.login,
       payload: {
         uid: result.uid,
         email: result.email,
@@ -88,7 +89,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const register = async (data: RegisterData): Promise<boolean> => {
-    dispatch({ type: "loading" });
+    dispatch({ type: ACTION_TYPES.loading });
     const displayName = `${data.firstName} ${data.lastName}`.trim();
     const result = await registerUserByCredentials(
       data.email,
@@ -97,7 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     if (!result.ok) {
-      dispatch({ type: "error", payload: result.errorMessage });
+      dispatch({ type: ACTION_TYPES.error, payload: result.errorMessage });
       return false;
     }
 
@@ -107,7 +108,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       photoURL: result.photoURL,
       username: displayName,
     };
-    dispatch({ type: "authenticated", payload: user });
+    dispatch({ type: ACTION_TYPES.login, payload: user });
 
     try {
       await saveProfile({
@@ -122,7 +123,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
     } catch (error) {
       dispatch({
-        type: "error",
+        type: ACTION_TYPES.error,
         payload:
           error instanceof Error
             ? error.message
@@ -133,12 +134,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = async (): Promise<void> => {
-    dispatch({ type: "loading" });
+    dispatch({ type: ACTION_TYPES.loading });
     try {
       await signOut(FirebaseAuth);
     } catch (error) {
       dispatch({
-        type: "error",
+        type: ACTION_TYPES.error,
         payload:
           error instanceof Error ? error.message : "No se pudo cerrar sesión.",
       });
@@ -154,7 +155,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     await updateFirebaseProfile(firebaseUser, { photoURL });
     dispatch({
-      type: "authenticated",
+      type: ACTION_TYPES.login,
       payload: { ...toAuthUser(firebaseUser), photoURL },
     });
   };
