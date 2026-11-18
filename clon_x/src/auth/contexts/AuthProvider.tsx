@@ -1,7 +1,6 @@
 import {
   onAuthStateChanged,
   signOut,
-  updateProfile as updateFirebaseProfile,
   type User as FirebaseUser,
 } from "firebase/auth";
 import {
@@ -74,9 +73,11 @@ const startSession = async (
       // Google accounts bring the full name; Firestore doesn't accept undefined.
       ...(firebaseUser.displayName ? { firstName: firebaseUser.displayName } : {}),
     });
+    // The photo saved in the profile wins over the one of the Google account.
+    const user = toAuthUser(firebaseUser, profile.handle);
     dispatch({
       type: ACTION_TYPES.login,
-      payload: toAuthUser(firebaseUser, profile.handle),
+      payload: { ...user, photoURL: profile.photoURL || user.photoURL },
     });
   } catch (error) {
     dispatch({
@@ -256,13 +257,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // The photo is saved in the Firestore profile (ProfilePage does it). It is not
+  // saved in Firebase Auth because Auth doesn't accept an image this long.
   const updatePhotoURL = async (photoURL: string): Promise<void> => {
-    const firebaseUser = FirebaseAuth.currentUser;
-    if (!firebaseUser || !authState.user) {
+    if (!authState.user) {
       throw new Error("Debes iniciar sesión para cambiar tu foto de perfil.");
     }
 
-    await updateFirebaseProfile(firebaseUser, { photoURL });
     dispatch({
       type: ACTION_TYPES.login,
       payload: { ...authState.user, photoURL },

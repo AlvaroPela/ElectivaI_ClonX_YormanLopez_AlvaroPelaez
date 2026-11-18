@@ -26,7 +26,6 @@ export const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState<ProfileImageType | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [imageOverrides, setImageOverrides] = useState<{
     avatar?: string;
     cover?: string;
@@ -89,15 +88,9 @@ export const ProfilePage = () => {
       if (!file) return;
 
       setUploading(type);
-      setUploadProgress(0);
       setUploadError(null);
       try {
-        const imageURL = await uploadProfileImage(
-          user.uid,
-          type,
-          file,
-          setUploadProgress,
-        );
+        const imageURL = await uploadProfileImage(type, file);
         setImageOverrides((current) => ({ ...current, [type]: imageURL }));
         const profileInput = {
           uid: user.uid,
@@ -132,7 +125,7 @@ export const ProfilePage = () => {
         {coverURL && <img src={coverURL} alt="" />}
         <label className="x-cover-edit">
           <XIcon name="camera" />
-          <span>{uploading === "cover" ? `${uploadProgress}%` : "Cambiar portada"}</span>
+          <span>{uploading === "cover" ? "Guardando..." : "Cambiar portada"}</span>
           <input
             className="visually-hidden"
             type="file"
@@ -165,7 +158,7 @@ export const ProfilePage = () => {
       </div>
       {uploading && (
         <p className="x-upload-progress" role="status">
-          Subiendo {uploading === "avatar" ? "foto de perfil" : "portada"}: {uploadProgress}%
+          Guardando {uploading === "avatar" ? "foto de perfil" : "portada"}...
         </p>
       )}
       {uploadError && (
