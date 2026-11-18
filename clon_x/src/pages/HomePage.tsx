@@ -7,14 +7,8 @@ import {
   watchProfileSuggestions,
   type Profile,
 } from "../firebase/profiles";
-import { XIcon, type XIconName } from "../ui/components/XIcon";
-
-const postActions: { icon: XIconName; label: string }[] = [
-  { icon: "reply", label: "Responder" },
-  { icon: "repost", label: "Repostear" },
-  { icon: "like", label: "Me gusta" },
-  { icon: "share", label: "Compartir" },
-];
+import { PostCard } from "../posts/components/PostCard";
+import { XIcon } from "../ui/components/XIcon";
 
 const trends = [
   { category: "Tendencia en Colombia", name: "#HoyEnNexo", posts: "12,4 mil posts" },
@@ -25,16 +19,6 @@ const trends = [
   },
   { category: "Tendencia", name: "Lo que está pasando", posts: "4.105 posts" },
 ];
-
-const getPostTime = (date: Date | null) => {
-  if (!date) return "ahora";
-  const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60_000));
-  if (minutes < 1) return "ahora";
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h`;
-  return `${Math.floor(hours / 24)} d`;
-};
 
 export const HomePage = () => {
   const { authState } = useContext(AuthContext);
@@ -228,35 +212,7 @@ export const HomePage = () => {
 
         <section className="x-post-list" aria-label="Publicaciones">
           {visiblePosts.map((post) => (
-            <article key={post.id} className="x-post">
-              <span className="x-avatar x-avatar-muted">
-                {post.author.charAt(0).toUpperCase()}
-              </span>
-              <div className="x-post-body">
-                <div className="x-post-heading">
-                  <strong>{post.author}</strong>
-                  <span>{post.handle} · {getPostTime(post.createdAt)}</span>
-                  <button type="button" aria-label="Más opciones">
-                    <XIcon name="more" />
-                  </button>
-                </div>
-                <p>{post.text}</p>
-                <div className="x-post-actions">
-                  {postActions.map(({ icon, label }) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      className={`x-post-action-${icon}`}
-                      aria-label={label}
-                      title={label}
-                    >
-                      <XIcon name={icon} />
-                      <span>{icon === "reply" || icon === "repost" ? "0" : ""}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </article>
+            <PostCard key={post.id} post={post} />
           ))}
           {visiblePosts.length === 0 && (
             <div className="x-empty-feed">
