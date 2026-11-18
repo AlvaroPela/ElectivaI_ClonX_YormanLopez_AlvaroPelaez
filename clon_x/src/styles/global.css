@@ -486,18 +486,19 @@ a {
   min-width: 0;
 }
 
-.x-post-heading strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.x-post-heading > span {
+.x-post-body .x-post-meta {
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
   color: var(--x-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.9rem;
+}
+
+.x-post-meta strong {
+  color: #e7e9ea;
+  font-size: 0.95rem;
 }
 
 .x-post-heading button {
