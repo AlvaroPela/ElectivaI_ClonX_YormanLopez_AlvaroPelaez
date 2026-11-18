@@ -1002,6 +1002,36 @@ a {
   }
 }
 
+.x-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--x-border);
+  color: var(--x-muted);
+  font-size: 0.9rem;
+}
+
+.x-pagination button {
+  min-width: 96px;
+  padding: 7px 16px;
+  border: 1px solid var(--x-border);
+  border-radius: 999px;
+  color: #e7e9ea;
+  background: transparent;
+  font-weight: 700;
+}
+
+.x-pagination button:hover:not(:disabled) {
+  background: #181818;
+}
+
+.x-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .x-toast {
   position: fixed;
   bottom: 32px;
