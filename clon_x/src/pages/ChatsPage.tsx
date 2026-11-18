@@ -7,7 +7,7 @@ export const ChatsPage = () => (
       <XIcon name="messages" />
       <h2>Envía un mensaje</h2>
       <p className="text-secondary">
-        Inicia una conversación privada con otras personas de X.
+        Inicia una conversación privada con otras personas de Nexo.
       </p>
       <button type="button" className="x-post-button" disabled>
         Nuevo mensaje

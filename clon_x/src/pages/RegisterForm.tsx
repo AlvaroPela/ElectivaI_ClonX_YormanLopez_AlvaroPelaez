@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+const today = new Date().toISOString().split("T")[0];
+
 export const RegisterForm = () => {
   return (
     <div className="d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
@@ -78,7 +80,7 @@ export const RegisterForm = () => {
             className="form-control"
             id="birthDate"
             name="birthDate"
-            max={new Date().toISOString().split("T")[0]}
+            max={today}
           />
         </div>
 
