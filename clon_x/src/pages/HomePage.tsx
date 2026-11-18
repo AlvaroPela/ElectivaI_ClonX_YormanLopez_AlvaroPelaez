@@ -7,7 +7,14 @@ import {
   watchProfileSuggestions,
   type Profile,
 } from "../firebase/profiles";
-import { XIcon } from "../ui/components/XIcon";
+import { XIcon, type XIconName } from "../ui/components/XIcon";
+
+const postActions: { icon: XIconName; label: string }[] = [
+  { icon: "reply", label: "Responder" },
+  { icon: "repost", label: "Repostear" },
+  { icon: "like", label: "Me gusta" },
+  { icon: "share", label: "Compartir" },
+];
 
 const trends = [
   { category: "Tendencia en Colombia", name: "#HoyEnNexo", posts: "12,4 mil posts" },
@@ -235,8 +242,14 @@ export const HomePage = () => {
                 </div>
                 <p>{post.text}</p>
                 <div className="x-post-actions">
-                  {(["reply", "repost", "like", "share"] as const).map((icon) => (
-                    <button key={icon} type="button" aria-label={icon}>
+                  {postActions.map(({ icon, label }) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      className={`x-post-action-${icon}`}
+                      aria-label={label}
+                      title={label}
+                    >
                       <XIcon name={icon} />
                       <span>{icon === "reply" || icon === "repost" ? "0" : ""}</span>
                     </button>
