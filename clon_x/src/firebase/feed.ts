@@ -1,5 +1,8 @@
 import { loadFirestore } from "./firestoreClient";
 
+// The feed keeps the latest posts in memory and the pages are made from them.
+const feedSize = 200;
+
 export interface FeedPost {
   id: string;
   uid: string;
@@ -32,7 +35,7 @@ export const watchFeed = async (
   const { collection, db, limit, onSnapshot, orderBy, query } =
     await loadFirestore();
   return onSnapshot(
-    query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50)),
+    query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(feedSize)),
     (snapshot) => {
       onChange(
         snapshot.docs.map((post) => {
