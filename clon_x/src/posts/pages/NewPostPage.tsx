@@ -2,6 +2,7 @@ import { useContext, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../auth/contexts/AuthContext";
 import { PostContext } from "../contexts/PostContext";
+import { POST_MESSAGES } from "../helpers/postMessages";
 import type { Post } from "../types/postReducerInterfaces";
 
 const maxPostLength = 280;
@@ -32,11 +33,11 @@ export const NewPostPage = () => {
     setSubmitting(false);
 
     if (!result) {
-      setError("No se pudo publicar el post. Inténtalo de nuevo.");
+      setError(POST_MESSAGES.publishError);
       return;
     }
 
-    navigate("/", { replace: true });
+    navigate("/", { replace: true, state: { notice: POST_MESSAGES.published } });
   };
 
   return (
