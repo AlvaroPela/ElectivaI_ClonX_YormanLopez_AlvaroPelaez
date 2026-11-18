@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'uid', 'email', 'username', 'handle', 'firstName', 'lastName',
+          'phone', 'birthdate', 'photoURL', 'coverURL', 'createdAt', 'updatedAt'
+        ]) &&
+        request.resource.data.email is string &&
+        request.resource.data.username is string &&
+        request.resource.data.handle is string;
+      allow update: if signedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email', 'username', 'handle', 'firstName', 'lastName',
+          'phone', 'birthdate', 'photoURL', 'coverURL', 'updatedAt'
+        ]);
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /follows/{followId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.keys().hasOnly([
+          'followerId', 'followingId', 'createdAt'
+        ]) &&
+        request.resource.data.followerId == request.auth.uid &&
+        request.resource.data.followingId is string &&
+        request.resource.data.followingId != request.auth.uid &&
+        followId == request.auth.uid + '_' + request.resource.data.followingId &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        exists(/databases/$(database)/documents/users/$(request.resource.data.followingId));
+      allow delete: if signedIn() &&
+        resource.data.followerId == request.auth.uid;
+      allow update: if false;
+    }
+
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() > 0 &&
+        request.resource.data.text.size() <= 280 &&
+        request.resource.data.keys().hasOnly([
+          'uid', 'author', 'handle', 'text', 'createdAt'
+        ]);
+      allow update, delete: if signedIn() &&
+        resource.data.uid == request.auth.uid;
+    }
+  }
+}

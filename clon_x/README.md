@@ -1,35 +1,30 @@
-# React + TypeScript + Vite
+# Clon X
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicación React con autenticación Firebase, rutas privadas y feed social en tiempo real.
 
-Currently, two official plugins are available:
+## Puesta en marcha
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. En Firebase Console, habilita **Authentication → Sign-in method → Email/Password**.
+2. Crea una base de datos de **Cloud Firestore** y habilita **Storage** para el proyecto configurado en `src/firebase/config.ts`.
+3. Desde esta carpeta, instala dependencias y ejecuta la aplicación:
 
-## React Compiler
+   ```sh
+   npm install
+   npm run dev
+   ```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+4. Despliega las reglas de Firestore y Storage para perfiles, publicaciones, seguimiento e imágenes:
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+   ```sh
+   firebase login
+   firebase use --add
+   firebase deploy --only firestore:rules,storage
+   ```
 
-## Expanding the Oxlint configuration
+   Selecciona el mismo proyecto Firebase configurado en la aplicación. Las reglas se definen en `firebase.json`, `firestore.rules` y `storage.rules`.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Sin sesión, las rutas de Inicio, Perfil, Notificaciones, Mensajes y Guardados redirigen al login. Al iniciar sesión, se vuelve a la ruta solicitada.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+El feed global se almacena en `posts`; los perfiles y relaciones de seguimiento se guardan en `users` y `follows`. Los contadores del perfil se actualizan en tiempo real a partir de esas relaciones.
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+En **Perfil** puedes cambiar la foto y la portada. Se aceptan imágenes JPG, PNG, WEBP o GIF de hasta 5 MB.

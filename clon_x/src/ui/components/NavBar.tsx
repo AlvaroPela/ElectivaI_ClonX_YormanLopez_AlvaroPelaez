@@ -1,91 +1,112 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../auth/contexts/AuthContext";
-import { useContext } from "react";
+import { XIcon, type XIconName } from "./XIcon";
+import { XLogo } from "./XLogo";
+
+const menuItems: { label: string; path: string; icon: XIconName }[] = [
+  { label: "Inicio", path: "/", icon: "home" },
+  { label: "Guardados", path: "/history", icon: "bookmark" },
+  { label: "Notificaciones", path: "/notifications", icon: "notifications" },
+  { label: "Mensajes", path: "/chats", icon: "messages" },
+  { label: "Perfil", path: "/profile", icon: "profile" },
+];
 
 export const NavBar = () => {
   const { authState, logout } = useContext(AuthContext);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const user = authState.user;
+  const username = user?.username || "Usuario";
+  const initials = username.charAt(0).toUpperCase();
 
-  const onLoginButton = () => {
-    navigate("/login", {
-      replace: true,
-    });
+  const onLogout = async () => {
+    setError(null);
+    try {
+      await logout();
+    } catch (logoutError) {
+      setError(
+        logoutError instanceof Error
+          ? logoutError.message
+          : "No se pudo cerrar sesión.",
+      );
+    }
   };
 
-  const onLogoutButton = () => {
-    const result = logout();
-    console.log("Logout:", result);
+  const onCompose = () => {
+    if (pathname === "/") {
+      document.getElementById("post-draft")?.focus();
+    } else {
+      navigate("/");
+    }
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary">
-      <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
-          Clon X
-        </Link>
+    <aside className="x-left-rail">
+      <NavLink to="/" className="x-brand" aria-label="Inicio de X">
+        <XLogo />
+      </NavLink>
 
+      <nav className="x-navigation" aria-label="Navegación principal">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === "/"}
+            className={({ isActive }) =>
+              `x-nav-link${isActive ? " active" : ""}`
+            }
+            aria-label={item.label}
+          >
+            <XIcon name={item.icon} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
         <button
-          className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          className="x-post-button"
+          aria-label="Publicar"
+          onClick={onCompose}
         >
-          <span className="navbar-toggler-icon"></span>
+          Publicar
         </button>
+      </nav>
 
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav me-auto">
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/">
-                Inicio
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/profile">
-                Perfil
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/notifications">
-                Notificaciones
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/history">
-                Guardados
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/chats">
-                Chats
-              </NavLink>
-            </li>
-          </ul>
-          {!authState.logged ? (
-            <button
-              className="btn-outline theme-success"
-              type="button"
-              onClick={onLoginButton}
-            >
-              Login
+      <div className="x-account-area">
+        {error && (
+          <p className="x-sidebar-error" role="alert">
+            {error}
+          </p>
+        )}
+        {accountMenuOpen && (
+          <div className="x-account-menu" role="menu" aria-label="Opciones de cuenta">
+            <button type="button" role="menuitem" onClick={() => void onLogout()}>
+              Cerrar sesión
             </button>
+          </div>
+        )}
+        <button
+          type="button"
+          className="x-account-button"
+          aria-expanded={accountMenuOpen}
+          aria-haspopup="menu"
+          aria-label="Opciones de cuenta"
+          onClick={() => setAccountMenuOpen((isOpen) => !isOpen)}
+        >
+          {user?.photoURL ? (
+            <img className="x-avatar" src={user.photoURL} alt="" />
           ) : (
-            <>
-              <button
-                className="btn-outline theme-danger"
-                type="button"
-                onClick={onLogoutButton}
-              >
-                Logout
-              </button>
-              <span>{authState.user.username || authState.user.email}</span>
-            </>
+            <span className="x-avatar">{initials}</span>
           )}
-        </div>
+          <span className="x-account-copy">
+            <strong>{username}</strong>
+            <span>{user?.email ? `@${user.email.split("@")[0]}` : ""}</span>
+          </span>
+          <XIcon name="more" />
+        </button>
       </div>
-    </nav>
+    </aside>
   );
 };

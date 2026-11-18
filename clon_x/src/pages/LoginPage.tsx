@@ -1,100 +1,89 @@
-import { useContext, useState, type ChangeEvent } from "react";
+import { useContext, useState, type FormEvent } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../auth/contexts/AuthContext";
+import { XLogo } from "../ui/components/XLogo";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.css";
 import logo from "../assets/logo.png";
 
-const initialForm = {
-  email: "",
-  password: "",
-};
+interface LoginLocationState {
+  from?: {
+    pathname?: string;
+  };
+}
 
 export const LoginPage = () => {
   const { authState, login } = useContext(AuthContext);
-
-  const [form, setForm] = useState(initialForm);
-  const [error, setError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
-  const { email, password } = form;
 
-  const onSingIn = async () => {
-    const result = await login(email, password);
-    if (result) {
-      navigate("/", {
-        replace: true,
-      });
-    } else {
-      setError(true);
+  if (!authState.loading && authState.logged) {
+    return <Navigate to="/" replace />;
+  }
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    const success = await login(email.trim(), password);
+    setSubmitting(false);
+
+    if (success) {
+      const state = location.state as LoginLocationState | null;
+      navigate(state?.from?.pathname || "/", { replace: true });
     }
-  };
-  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const input = event.target;
-    setForm({
-      ...form,
-      [input.name]: input.value,
-    });
-
-    console.log(input.name);
   };
 
   return (
-    <>
-      <div className="row g-0 min-vh-100 align-items-center">
-        <div className="row min-vh-100 align-items-center">
-          <div className="col-md-6 d-flex justify-content-center">
-            <img src={logo} alt="Logo" className={styles.logo}></img>
-          </div>
-          <div className="col-md-6 px-4">
-            <h1 className={styles.title}>Lo que está pasando ahora</h1>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="login-title">
+        <XLogo className="auth-logo" />
+        <h1 id="login-title">Lo que está pasando ahora</h1>
+        <p className="auth-subtitle">Inicia sesión en X</p>
 
-            <form className={styles.form}>
-              {/* Input de Email */}
-              <div className="form-outline mb-4">
-                <input
-                  type="email"
-                  name="email"
-                  id="form2Example1"
-                  value={email}
-                  className="form-control"
-                  onChange={onInputChange}
-                />
-                <label className="form-label" htmlFor="form2Example1">
-                  Correo Electronico
-                </label>
-              </div>
+        <form onSubmit={onSubmit}>
+          <label className="auth-field">
+            <span>Correo electrónico</span>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          <label className="auth-field">
+            <span>Contraseña</span>
+            <input
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          {authState.errorMessage && (
+            <p className="auth-error" role="alert">
+              {authState.errorMessage}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="auth-button"
+            disabled={submitting || authState.loading}
+          >
+            {submitting ? "Iniciando sesión..." : "Iniciar sesión"}
+          </button>
+        </form>
 
-              {/* Input password */}
-              <div className="form-outline mb-4">
-                <input
-                  type="password"
-                  name="password"
-                  id="form2Example2"
-                  value={password}
-                  className="form-control"
-                  onChange={onInputChange}
-                />
-                <label className="form-label" htmlFor="form2Example2">
-                  Contraseña
-                </label>
-              </div>
-              {error && (
-                <p className="text-danger">Correo o contraseña incorrecta</p>
-              )}
-              {/* Botón de Inicio Sesión */}
-              <button
-                type="button"
-                className={`btn btn-light w-100 ${styles.pill}`}
-                onClick={onSingIn}
-              >
-                Iniciar sesión
-              </button>
-              <p className="mt-3 text-center">
-                        ¿Aun no tienes cuenta? <Link to="/register">Registrarse</Link>
-                      </p>
-            </form>
-          </div>
-        </div>
-      </div>
-    </>
+        <p className="auth-footer">
+          ¿No tienes una cuenta? <Link to="/register">Regístrate</Link>
+        </p>
+      </section>
+    </main>
   );
 };
