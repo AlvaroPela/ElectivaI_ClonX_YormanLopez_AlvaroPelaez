@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../auth/contexts/AuthContext";
 import { XIcon, type XIconName } from "./XIcon";
 import { XLogo } from "./XLogo";
@@ -17,7 +17,6 @@ export const NavBar = () => {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const user = authState.user;
   const username = user?.username || "Usuario";
   const initials = username.charAt(0).toUpperCase();
@@ -36,11 +35,7 @@ export const NavBar = () => {
   };
 
   const onCompose = () => {
-    if (pathname === "/") {
-      document.getElementById("post-draft")?.focus();
-    } else {
-      navigate("/");
-    }
+    navigate("/new-post");
   };
 
   return (

@@ -1,8 +1,8 @@
 import { useContext, useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import type { RegisterData } from "../auth/contexts/AuthContext";
-import { AuthContext } from "../auth/contexts/AuthContext";
-import { XLogo } from "../ui/components/XLogo";
+import type { RegisterData } from "../contexts/AuthContext";
+import { AuthContext } from "../contexts/AuthContext";
+import { XLogo } from "../../ui/components/XLogo";
 
 const initialForm: RegisterData = {
   firstName: "",

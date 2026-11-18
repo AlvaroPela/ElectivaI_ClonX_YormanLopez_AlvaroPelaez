@@ -1,10 +1,14 @@
 import { FirebaseError } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithPopup,
   updateProfile,
 } from "firebase/auth";
 import { FirebaseAuth } from "./config";
+
+const GoogleProvider = new GoogleAuthProvider();
 
 export interface AuthSuccess {
   ok: true;
@@ -58,6 +62,24 @@ export const loginUserByCredentials = async (
       email: user.email || email,
       displayName: user.displayName,
       photoURL: user.photoURL,
+    };
+  } catch (error) {
+    return toAuthFailure(error);
+  }
+};
+
+export const loginUserByGoogleProvider = async (): Promise<AuthResult> => {
+  try {
+    const result = await signInWithPopup(FirebaseAuth, GoogleProvider);
+
+    const { displayName, email, photoURL, uid } = result.user;
+
+    return {
+      ok: true,
+      uid,
+      email: email || "",
+      displayName,
+      photoURL,
     };
   } catch (error) {
     return toAuthFailure(error);

@@ -11,12 +11,15 @@ export interface RegisterData {
   phone: string;
 }
 
-interface AuthContextProps {
+interface AuthContextValueObject {
   authState: AuthState;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => Promise<void>;
   updatePhotoURL: (photoURL: string) => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
+const defaultValue = {} as AuthContextValueObject;
+
+export const AuthContext = createContext(defaultValue);
