@@ -2,15 +2,26 @@ import {
   onAuthStateChanged,
   signOut,
   updateProfile as updateFirebaseProfile,
+  type User as FirebaseUser,
 } from "firebase/auth";
-import { useEffect, useReducer, type ReactNode } from "react";
+import {
+  useEffect,
+  useReducer,
+  useRef,
+  type Dispatch,
+  type ReactNode,
+} from "react";
 import { FirebaseAuth } from "../../firebase/config";
 import {
   loginUserByCredentials,
   loginUserByGoogleProvider,
   registerUserByCredentials,
 } from "../../firebase/providers";
-import { ensureProfile, saveProfile } from "../../firebase/profiles";
+import {
+  ensureProfile,
+  normalizeUsername,
+  saveProfile,
+} from "../../firebase/profiles";
 import { AuthContext, type RegisterData } from "./AuthContext";
 import { ACTION_TYPES } from "../reducers/actionTypes";
 import { authReducer } from "../reducers/authReducer";
@@ -31,17 +42,102 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const toAuthUser = (
-  user: NonNullable<typeof FirebaseAuth.currentUser>,
-): AuthUser => ({
+const getEmailName = (user: FirebaseUser) =>
+  user.email?.split("@")[0] || "usuario";
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error ? error.message : fallback;
+
+const toAuthUser = (user: FirebaseUser, username: string): AuthUser => ({
   uid: user.uid,
   email: user.email || "",
   photoURL: user.photoURL,
-  username: user.displayName || user.email?.split("@")[0] || "usuario",
+  fullName: user.displayName || getEmailName(user),
+  username,
 });
+
+// Logs the user in with the username saved in its Firestore profile.
+// If the profile can't be read, the session still starts with a temporary username.
+const startSession = async (
+  firebaseUser: FirebaseUser,
+  dispatch: Dispatch<AuthReducerAction>,
+) => {
+  try {
+    const profile = await ensureProfile({
+      uid: firebaseUser.uid,
+      email: firebaseUser.email || "",
+      username: getEmailName(firebaseUser),
+      photoURL: firebaseUser.photoURL,
+    });
+    dispatch({
+      type: ACTION_TYPES.login,
+      payload: toAuthUser(firebaseUser, profile.handle),
+    });
+  } catch (error) {
+    dispatch({
+      type: ACTION_TYPES.login,
+      payload: toAuthUser(firebaseUser, getEmailName(firebaseUser)),
+    });
+    dispatch({
+      type: ACTION_TYPES.error,
+      payload: getErrorMessage(error, "No se pudo cargar el perfil de Firestore."),
+    });
+  }
+};
+
+// Creates the Firebase account, logs the user in and saves the profile with its username.
+const createAccount = async (
+  data: RegisterData,
+  dispatch: Dispatch<AuthReducerAction>,
+): Promise<boolean> => {
+  const fullName = `${data.firstName} ${data.lastName}`.trim();
+  const username = normalizeUsername(data.username);
+  const result = await registerUserByCredentials(
+    data.email,
+    data.password,
+    fullName,
+  );
+
+  if (!result.ok) {
+    dispatch({ type: ACTION_TYPES.error, payload: result.errorMessage });
+    return false;
+  }
+
+  const user: AuthUser = {
+    uid: result.uid,
+    email: result.email,
+    photoURL: result.photoURL,
+    fullName,
+    username,
+  };
+  dispatch({ type: ACTION_TYPES.login, payload: user });
+
+  try {
+    await saveProfile({
+      uid: result.uid,
+      email: result.email,
+      username,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      birthdate: data.birthdate,
+      photoURL: result.photoURL,
+    });
+  } catch (error) {
+    dispatch({
+      type: ACTION_TYPES.error,
+      payload: getErrorMessage(error, "No se pudo guardar el perfil en Firestore."),
+    });
+  }
+
+  return true;
+};
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authState, dispatch] = useReducer(authReducer, initialState);
+  // While an account is being registered, register() saves the profile with the
+  // chosen username, so the auth listener must not create a default one.
+  const registeringRef = useRef(false);
 
   useEffect(() => {
     return onAuthStateChanged(FirebaseAuth, async (firebaseUser) => {
@@ -50,25 +146,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      const user = toAuthUser(firebaseUser);
-      dispatch({ type: ACTION_TYPES.login, payload: user });
+      if (registeringRef.current) return;
 
-      try {
-        await ensureProfile({
-          uid: user.uid,
-          email: user.email,
-          username: user.username,
-          photoURL: user.photoURL,
-        });
-      } catch (error) {
-        dispatch({
-          type: ACTION_TYPES.error,
-          payload:
-            error instanceof Error
-              ? error.message
-              : "No se pudo guardar el perfil en Firestore.",
-        });
-      }
+      await startSession(firebaseUser, dispatch);
     });
   }, []);
 
@@ -76,30 +156,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     dispatch({ type: ACTION_TYPES.loading });
     const result = await loginUserByCredentials(email, password);
 
-    if (!result.ok) {
-      dispatch({ type: ACTION_TYPES.error, payload: result.errorMessage });
+    if (!result.ok || !FirebaseAuth.currentUser) {
+      const errorMessage = result.ok ? "No se pudo iniciar sesión." : result.errorMessage;
+      dispatch({ type: ACTION_TYPES.error, payload: errorMessage });
       return false;
     }
 
-    dispatch({
-      type: ACTION_TYPES.login,
-      payload: {
-        uid: result.uid,
-        email: result.email,
-        photoURL: result.photoURL,
-        username: result.displayName || result.email.split("@")[0],
-      },
-    });
+    await startSession(FirebaseAuth.currentUser, dispatch);
     return true;
   };
 
   const loginWithGoogle = async (): Promise<boolean> => {
     const result = await loginUserByGoogleProvider();
 
-    if (!result.ok) {
+    if (!result.ok || !FirebaseAuth.currentUser) {
       const action: AuthReducerAction = {
         type: ACTION_TYPES.error,
-        payload: result.errorMessage,
+        payload: result.ok ? "No se pudo iniciar sesión." : result.errorMessage,
       };
 
       dispatch(action);
@@ -107,68 +180,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return false;
     }
 
-    const { uid, displayName, email, photoURL } = result;
-
-    const user: AuthUser = {
-      uid,
-      email,
-      photoURL,
-      username: displayName || email.split("@")[0],
-    };
-
-    const action: AuthReducerAction = {
-      type: ACTION_TYPES.login,
-      payload: user,
-    };
-
-    dispatch(action);
+    await startSession(FirebaseAuth.currentUser, dispatch);
 
     return true;
   };
 
-  const register =async (data: RegisterData): Promise<boolean> => {
+  const register = async (data: RegisterData): Promise<boolean> => {
     dispatch({ type: ACTION_TYPES.loading });
-    const displayName = `${data.firstName} ${data.lastName}`.trim();
-    const result = await registerUserByCredentials(
-      data.email,
-      data.password,
-      displayName,
-    );
 
-    if (!result.ok) {
-      dispatch({ type: ACTION_TYPES.error, payload: result.errorMessage });
-      return false;
-    }
+    registeringRef.current = true;
+    const created = await createAccount(data, dispatch);
+    registeringRef.current = false;
 
-    const user: AuthUser = {
-      uid: result.uid,
-      email: result.email,
-      photoURL: result.photoURL,
-      username: displayName,
-    };
-    dispatch({ type: ACTION_TYPES.login, payload: user });
-
-    try {
-      await saveProfile({
-        uid: result.uid,
-        email: result.email,
-        username: data.username,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        birthdate: data.birthdate,
-        photoURL: result.photoURL,
-      });
-    } catch (error) {
-      dispatch({
-        type: ACTION_TYPES.error,
-        payload:
-          error instanceof Error
-            ? error.message
-            : "No se pudo guardar el perfil en Firestore.",
-      });
-    }
-    return true;
+    return created;
   };
 
   const logout = async (): Promise<void> => {
@@ -178,8 +202,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       dispatch({
         type: ACTION_TYPES.error,
-        payload:
-          error instanceof Error ? error.message : "No se pudo cerrar sesión.",
+        payload: getErrorMessage(error, "No se pudo cerrar sesión."),
       });
       throw error;
     }
@@ -187,14 +210,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const updatePhotoURL = async (photoURL: string): Promise<void> => {
     const firebaseUser = FirebaseAuth.currentUser;
-    if (!firebaseUser) {
+    if (!firebaseUser || !authState.user) {
       throw new Error("Debes iniciar sesión para cambiar tu foto de perfil.");
     }
 
     await updateFirebaseProfile(firebaseUser, { photoURL });
     dispatch({
       type: ACTION_TYPES.login,
-      payload: { ...toAuthUser(firebaseUser), photoURL },
+      payload: { ...authState.user, photoURL },
     });
   };
 

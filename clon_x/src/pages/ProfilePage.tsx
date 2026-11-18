@@ -120,7 +120,7 @@ export const ProfilePage = () => {
 
   const name = profile?.firstName
     ? `${profile.firstName} ${profile.lastName || ""}`.trim()
-    : user.username;
+    : user.fullName;
   const avatarURL = imageOverrides.avatar || profile?.photoURL || user.photoURL;
   const coverURL = imageOverrides.cover || profile?.coverURL;
 
@@ -173,7 +173,7 @@ export const ProfilePage = () => {
       <section aria-label="Información del perfil">
         <h2 className="mt-3 mb-0 fs-5 fw-bold">{name}</h2>
         <p className="text-secondary mb-2">
-          @{profile?.handle || user.email.split("@")[0]}
+          @{profile?.handle || user.username}
         </p>
         <div className="x-profile-stats">
           <span>

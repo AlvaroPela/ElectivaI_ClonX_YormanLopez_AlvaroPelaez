@@ -18,8 +18,8 @@ export const NavBar = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const user = authState.user;
-  const username = user?.username || "Usuario";
-  const initials = username.charAt(0).toUpperCase();
+  const fullName = user?.fullName || "Usuario";
+  const initials = fullName.charAt(0).toUpperCase();
 
   const onLogout = async () => {
     setError(null);
@@ -96,8 +96,8 @@ export const NavBar = () => {
             <span className="x-avatar">{initials}</span>
           )}
           <span className="x-account-copy">
-            <strong>{username}</strong>
-            <span>{user?.email ? `@${user.email.split("@")[0]}` : ""}</span>
+            <strong>{fullName}</strong>
+            <span>{user ? `@${user.username}` : ""}</span>
           </span>
           <XIcon name="more" />
         </button>
