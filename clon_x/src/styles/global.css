@@ -1060,3 +1060,109 @@ a {
     max-width: calc(100% - 32px);
   }
 }
+
+.x-post-author,
+.x-profile-stats a,
+.x-suggestion-copy {
+  color: inherit;
+  text-decoration: none;
+}
+
+.x-post-author:hover strong,
+.x-profile-stats a:hover,
+a.x-suggestion-copy:hover strong {
+  text-decoration: underline;
+}
+
+.x-user-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.x-user-header h1 {
+  margin-bottom: 2px;
+}
+
+.x-follow-button {
+  min-width: 92px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #0f1419;
+  background: #eff3f4;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.x-follow-button.following {
+  border: 1px solid #536471;
+  color: #e7e9ea;
+  background: transparent;
+}
+
+.x-user-list {
+  margin-top: 8px;
+  border-top: 1px solid var(--x-border);
+}
+
+.x-follow-form {
+  padding: 12px 16px 16px;
+}
+
+.x-follow-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 750;
+}
+
+.x-follow-form div {
+  display: flex;
+  gap: 8px;
+}
+
+.x-follow-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--x-border);
+  border-radius: 999px;
+  color: #e7e9ea;
+  background: #000;
+}
+
+.x-follow-form button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--x-blue);
+  font-weight: 750;
+}
+
+.x-follow-form button:disabled {
+  opacity: 0.5;
+}
+
+.x-follow-form p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+
+.x-follow-form-success {
+  color: #00ba7c;
+}
+
+.x-follow-form-error {
+  color: #f4212e;
+}
+
+.x-home-counts {
+  padding: 0 16px 12px;
+}
+
+.x-home-counts .x-profile-stats {
+  margin-top: 0;
+  font-size: 0.9rem;
+}

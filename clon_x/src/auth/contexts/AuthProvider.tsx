@@ -71,6 +71,8 @@ const startSession = async (
       email: firebaseUser.email || "",
       username: getEmailName(firebaseUser),
       photoURL: firebaseUser.photoURL,
+      // Google accounts bring the full name; Firestore doesn't accept undefined.
+      ...(firebaseUser.displayName ? { firstName: firebaseUser.displayName } : {}),
     });
     dispatch({
       type: ACTION_TYPES.login,

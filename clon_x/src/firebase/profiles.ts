@@ -56,7 +56,7 @@ export const findEmailByUsername = async (
   return String(snapshot.data().email || "") || null;
 };
 
-const parseProfile = (
+export const parseProfile = (
   uid: string,
   data: Record<string, unknown>,
 ): Profile => ({

@@ -14,6 +14,8 @@ import { Pagination } from "../ui/components/Pagination";
 import { SuccessToast } from "../ui/components/SuccessToast";
 import { paginate } from "../ui/helpers/paginate";
 import { XIcon } from "../ui/components/XIcon";
+import { FollowByUsernameForm } from "../users/components/FollowByUsernameForm";
+import { FollowCounts } from "../users/components/FollowCounts";
 
 const trends = [
   { category: "Tendencia en Colombia", name: "#HoyEnNexo", posts: "12,4 mil posts" },
@@ -194,6 +196,9 @@ export const HomePage = () => {
       <main className="x-feed-column">
         <header className="x-feed-header">
           <h1>Inicio</h1>
+          <div className="x-home-counts">
+            <FollowCounts uid={user.uid} username={user.username} />
+          </div>
           <div className="x-feed-tabs" role="tablist" aria-label="Tipo de feed">
             <button
               type="button"
@@ -282,6 +287,10 @@ export const HomePage = () => {
             </div>
           ))}
           <button type="button" className="x-show-more">Mostrar más</button>
+        </section>
+
+        <section className="x-panel">
+          <FollowByUsernameForm />
         </section>
 
         <section className="x-panel">
