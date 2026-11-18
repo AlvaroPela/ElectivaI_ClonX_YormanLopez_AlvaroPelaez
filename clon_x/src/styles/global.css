@@ -1166,3 +1166,124 @@ a.x-suggestion-copy:hover strong {
   margin-top: 0;
   font-size: 0.9rem;
 }
+
+.x-post-image {
+  display: block;
+  width: 100%;
+  max-height: 510px;
+  margin: 0 0 12px;
+  border: 1px solid var(--x-border);
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.x-image-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  min-width: 0;
+}
+
+.x-compose-actions .x-image-button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--x-blue);
+  background: transparent;
+}
+
+.x-compose-actions .x-image-button:hover:not(:disabled) {
+  background: rgba(29, 155, 240, 0.1);
+}
+
+.x-compose-actions .x-image-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.x-image-error {
+  overflow: hidden;
+  color: #f4212e;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.x-image-preview {
+  position: relative;
+  margin: 8px 0;
+}
+
+.x-image-preview img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.x-image-preview button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(15, 20, 25, 0.75);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.x-comments {
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--x-border);
+}
+
+.x-comment {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--x-border);
+}
+
+.x-post-body .x-comment p {
+  margin: 0;
+}
+
+.x-comment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.x-comment-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--x-border);
+  border-radius: 999px;
+  color: #e7e9ea;
+  background: #000;
+}
+
+.x-comment-form button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--x-blue);
+  font-weight: 750;
+}
+
+.x-comment-form button:disabled {
+  opacity: 0.5;
+}

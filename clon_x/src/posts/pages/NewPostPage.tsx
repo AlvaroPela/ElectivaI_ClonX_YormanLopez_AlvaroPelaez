@@ -2,6 +2,7 @@ import { useContext, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../auth/contexts/AuthContext";
 import { PostContext } from "../contexts/PostContext";
+import { ImagePicker, ImagePreview } from "../components/ImagePicker";
 import { POST_MESSAGES } from "../helpers/postMessages";
 import type { Post } from "../types/postReducerInterfaces";
 
@@ -11,6 +12,7 @@ export const NewPostPage = () => {
   const { authState } = useContext(AuthContext);
   const { savePost } = useContext(PostContext);
   const [text, setText] = useState("");
+  const [imageURL, setImageURL] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -18,13 +20,14 @@ export const NewPostPage = () => {
   const onSavePost = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const user = authState.user;
-    if (!user || !text.trim()) return;
+    if (!user || (!text.trim() && !imageURL)) return;
 
     const post: Post = {
       uid: user.uid,
       author: user.fullName,
       handle: `@${user.username}`,
       text: text.trim(),
+      ...(imageURL ? { imageURL } : {}),
       createdAt: new Date(),
     };
 
@@ -62,9 +65,11 @@ export const NewPostPage = () => {
             value={text}
             onChange={(event) => setText(event.target.value)}
           />
+          <ImagePreview imageURL={imageURL} onRemove={() => setImageURL(null)} />
           <div className="x-compose-actions">
+            <ImagePicker onChange={setImageURL} />
             <span>{maxPostLength - text.length}</span>
-            <button type="submit" disabled={!text.trim() || submitting}>
+            <button type="submit" disabled={(!text.trim() && !imageURL) || submitting}>
               {submitting ? "Publicando..." : "Publicar"}
             </button>
           </div>

@@ -1,4 +1,4 @@
-import type { FeedPost } from "./feed";
+import { toFeedPost, type FeedPost } from "./feed";
 import { loadFirestore } from "./firestoreClient";
 import { normalizeUsername, parseProfile, type Profile } from "./profiles";
 
@@ -87,16 +87,3 @@ export const watchUserPosts = async (
 
 const byNewest = (first: FeedPost, second: FeedPost) =>
   (second.createdAt?.getTime() ?? Date.now()) - (first.createdAt?.getTime() ?? Date.now());
-
-const toFeedPost = (id: string, data: Record<string, unknown>): FeedPost => {
-  const createdAt = data.createdAt as { toDate?: () => Date } | undefined;
-
-  return {
-    id,
-    uid: String(data.uid || ""),
-    author: String(data.author || "Usuario"),
-    handle: String(data.handle || "@usuario"),
-    text: String(data.text || ""),
-    createdAt: typeof createdAt?.toDate === "function" ? createdAt.toDate() : null,
-  };
-};

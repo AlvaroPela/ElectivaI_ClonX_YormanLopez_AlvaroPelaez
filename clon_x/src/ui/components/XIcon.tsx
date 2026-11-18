@@ -5,6 +5,7 @@ import {
   Ellipsis,
   Heart,
   House,
+  Image,
   Mail,
   MessageCircle,
   Repeat2,
@@ -26,7 +27,8 @@ export type XIconName =
   | "repost"
   | "like"
   | "share"
-  | "camera";
+  | "camera"
+  | "image";
 
 // Each icon name of the app points to one icon of the lucide-react library,
 // so the components keep using names and the library can be changed in one place.
@@ -43,6 +45,7 @@ const icons: Record<XIconName, LucideIcon> = {
   like: Heart,
   share: Share,
   camera: Camera,
+  image: Image,
 };
 
 interface XIconProps {
