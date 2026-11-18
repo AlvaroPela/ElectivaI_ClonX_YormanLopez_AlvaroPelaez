@@ -38,7 +38,7 @@ export const LoginPage = () => {
       <section className="auth-card" aria-labelledby="login-title">
         <XLogo className="auth-logo" />
         <h1 id="login-title">Lo que está pasando ahora</h1>
-        <p className="auth-subtitle">Inicia sesión en X</p>
+        <p className="auth-subtitle">Inicia sesión en Nexo</p>
 
         <form onSubmit={onSubmit}>
           <label className="auth-field">

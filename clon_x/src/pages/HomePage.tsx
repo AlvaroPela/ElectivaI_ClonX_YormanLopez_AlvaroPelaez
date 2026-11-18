@@ -10,7 +10,7 @@ import {
 import { XIcon } from "../ui/components/XIcon";
 
 const trends = [
-  { category: "Tendencia en Colombia", name: "#HoyEnX", posts: "12,4 mil posts" },
+  { category: "Tendencia en Colombia", name: "#HoyEnNexo", posts: "12,4 mil posts" },
   {
     category: "Tecnología · Tendencia",
     name: "Inteligencia artificial",

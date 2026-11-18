@@ -45,7 +45,7 @@ export const NavBar = () => {
 
   return (
     <aside className="x-left-rail">
-      <NavLink to="/" className="x-brand" aria-label="Inicio de X">
+      <NavLink to="/" className="x-brand" aria-label="Inicio de Nexo">
         <XLogo />
       </NavLink>
 
