@@ -26,6 +26,21 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid == userId;
     }
 
+    // One document per reserved username so it can only belong to one account.
+    // Anyone can check a single username (needed to register and to log in by username),
+    // but nobody can list the whole collection.
+    match /usernames/{username} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn() &&
+        username.matches('^[a-z0-9_]{3,15}$') &&
+        request.resource.data.keys().hasOnly(['uid', 'email']) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     match /follows/{followId} {
       allow read: if signedIn();
       allow create: if signedIn() &&
