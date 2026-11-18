@@ -8,6 +8,7 @@ import {
   type Profile,
 } from "../firebase/profiles";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ImagePicker, ImagePreview } from "../posts/components/ImagePicker";
 import { PostCard } from "../posts/components/PostCard";
 import { POST_MESSAGES } from "../posts/helpers/postMessages";
 import { Pagination } from "../ui/components/Pagination";
@@ -46,6 +47,7 @@ export const HomePage = () => {
   const [suggestions, setSuggestions] = useState<Profile[]>([]);
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
   const [draft, setDraft] = useState("");
+  const [imageURL, setImageURL] = useState<string | null>(null);
   // The feed starts with the posts of the user and the accounts they follow.
   const [activeTab, setActiveTab] = useState<"for-you" | "following">("following");
   const [page, setPage] = useState(1);
@@ -150,18 +152,20 @@ export const HomePage = () => {
   const onPublish = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = draft.trim();
-    if (!text || submitting) return;
+    if ((!text && !imageURL) || submitting) return;
 
     setSubmitting(true);
     setPageError(null);
     try {
-      await publishPost(
-        user.uid,
-        fullName,
-        `@${user.username}`,
+      await publishPost({
+        uid: user.uid,
+        author: fullName,
+        handle: `@${user.username}`,
         text,
-      );
+        imageURL,
+      });
       setDraft("");
+      setImageURL(null);
       setNotice({ id: Date.now(), text: POST_MESSAGES.published });
     } catch (error) {
       setPageError(
@@ -244,9 +248,11 @@ export const HomePage = () => {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
             />
+            <ImagePreview imageURL={imageURL} onRemove={() => setImageURL(null)} />
             <div className="x-compose-actions">
+              <ImagePicker onChange={setImageURL} />
               <span>{280 - draft.length}</span>
-              <button type="submit" disabled={!draft.trim() || submitting}>
+              <button type="submit" disabled={(!draft.trim() && !imageURL) || submitting}>
                 {submitting ? "Publicando..." : "Publicar"}
               </button>
             </div>

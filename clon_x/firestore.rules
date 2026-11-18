@@ -58,18 +58,42 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // A post image is a small JPEG saved as a data URL inside the post.
+    function validImage(data) {
+      return !('imageURL' in data) || (
+        data.imageURL is string &&
+        data.imageURL.size() < 800000 &&
+        data.imageURL[0:23] == 'data:image/jpeg;base64,'
+      );
+    }
+
     match /posts/{postId} {
       allow read: if signedIn();
       allow create: if signedIn() &&
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.text is string &&
-        request.resource.data.text.size() > 0 &&
+        (request.resource.data.text.size() > 0 || 'imageURL' in request.resource.data) &&
         request.resource.data.text.size() <= 280 &&
+        validImage(request.resource.data) &&
         request.resource.data.keys().hasOnly([
-          'uid', 'author', 'handle', 'text', 'createdAt'
+          'uid', 'author', 'handle', 'text', 'imageURL', 'createdAt'
         ]);
       allow update, delete: if signedIn() &&
         resource.data.uid == request.auth.uid;
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() > 0 &&
+          request.resource.data.text.size() <= 280 &&
+          request.resource.data.keys().hasOnly([
+            'uid', 'author', 'handle', 'text', 'createdAt'
+          ]);
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+        allow update: if false;
+      }
     }
   }
 }

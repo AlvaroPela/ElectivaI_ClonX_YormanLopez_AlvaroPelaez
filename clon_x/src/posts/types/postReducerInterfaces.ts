@@ -7,6 +7,7 @@ export interface Post {
   author: string;
   handle: string;
   text: string;
+  imageURL?: string;
   createdAt: Date;
 }
 
