@@ -19,6 +19,7 @@ import {
 } from "../../firebase/providers";
 import {
   ensureProfile,
+  findEmailByUsername,
   isUsernameAvailable,
   isValidUsername,
   normalizeUsername,
@@ -84,6 +85,19 @@ const startSession = async (
       type: ACTION_TYPES.error,
       payload: getErrorMessage(error, "No se pudo cargar el perfil de Firestore."),
     });
+  }
+};
+
+const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+// The login form accepts an email or a username; returns the email to log in with.
+const resolveLoginEmail = async (identifier: string): Promise<string | null> => {
+  if (emailPattern.test(identifier)) return identifier;
+
+  try {
+    return await findEmailByUsername(identifier);
+  } catch {
+    return null;
   }
 };
 
@@ -168,8 +182,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (identifier: string, password: string): Promise<boolean> => {
     dispatch({ type: ACTION_TYPES.loading });
+    const email = await resolveLoginEmail(identifier);
+
+    if (!email) {
+      dispatch({
+        type: ACTION_TYPES.error,
+        payload: "No existe una cuenta con ese nombre de usuario.",
+      });
+      return false;
+    }
+
     const result = await loginUserByCredentials(email, password);
 
     if (!result.ok || !FirebaseAuth.currentUser) {

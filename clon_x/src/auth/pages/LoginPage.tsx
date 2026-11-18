@@ -11,7 +11,7 @@ interface LoginLocationState {
 
 export const LoginPage = () => {
   const { authState, login, loginWithGoogle } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const location = useLocation();
@@ -24,7 +24,7 @@ export const LoginPage = () => {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
-    const success = await login(email.trim(), password);
+    const success = await login(identifier.trim(), password);
     setSubmitting(false);
 
     if (success) {
@@ -52,14 +52,14 @@ export const LoginPage = () => {
 
         <form onSubmit={onSubmit}>
           <label className="auth-field">
-            <span>Correo electrónico</span>
+            <span>Correo o nombre de usuario</span>
             <input
-              type="email"
-              name="email"
-              autoComplete="email"
+              type="text"
+              name="identifier"
+              autoComplete="username"
               required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
             />
           </label>
           <label className="auth-field">

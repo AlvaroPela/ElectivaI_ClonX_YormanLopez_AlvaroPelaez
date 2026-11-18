@@ -27,7 +27,7 @@ export type AuthResult = AuthSuccess | AuthFailure;
 
 const toAuthFailure = (error: unknown): AuthFailure => {
   const messages: Record<string, string> = {
-    "auth/invalid-credential": "Correo o contraseña incorrectos.",
+    "auth/invalid-credential": "Usuario, correo o contraseña incorrectos.",
     "auth/user-not-found": "No existe una cuenta con ese correo.",
     "auth/wrong-password": "La contraseña es incorrecta.",
     "auth/email-already-in-use": "Ya existe una cuenta con ese correo.",
