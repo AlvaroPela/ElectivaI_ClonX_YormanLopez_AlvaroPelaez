@@ -15,6 +15,7 @@ import {
   uploadProfileImage,
   type ProfileImageType,
 } from "../firebase/profileImages";
+import { Link } from "react-router-dom";
 import { XIcon } from "../ui/components/XIcon";
 
 export const ProfilePage = () => {
@@ -176,12 +177,12 @@ export const ProfilePage = () => {
           @{profile?.handle || user.username}
         </p>
         <div className="x-profile-stats">
-          <span>
+          <Link to={`/user/${profile?.handle || user.username}/following`}>
             <strong>{counts.following}</strong> Siguiendo
-          </span>
-          <span>
+          </Link>
+          <Link to={`/user/${profile?.handle || user.username}/followers`}>
             <strong>{counts.followers}</strong> Seguidores
-          </span>
+          </Link>
         </div>
       </section>
       {error && <p className="x-inline-error mt-3" role="alert">{error}</p>}
