@@ -1,7 +1,7 @@
 import { useContext, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../auth/contexts/AuthContext";
-import { XLogo } from "../ui/components/XLogo";
+import { AuthContext } from "../contexts/AuthContext";
+import { XLogo } from "../../ui/components/XLogo";
 
 interface LoginLocationState {
   from?: {

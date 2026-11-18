@@ -4,10 +4,10 @@ import { AuthContext } from "../auth/contexts/AuthContext";
 import { ChatsPage } from "../pages/ChatsPage";
 import { HistoryPage } from "../pages/HistoryPage";
 import { HomePage } from "../pages/HomePage";
-import { LoginPage } from "../pages/LoginPage";
+import { LoginPage } from "../auth/pages/LoginPage";
 import { NotificationsPage } from "../pages/NotificationsPage";
 import { ProfilePage } from "../pages/ProfilePage";
-import { RegisterPage } from "../pages/RegisterPage";
+import { RegisterPage } from "../auth/pages/RegisterPage";
 
 const PrivateRoutes = () => {
   const { authState } = useContext(AuthContext);
