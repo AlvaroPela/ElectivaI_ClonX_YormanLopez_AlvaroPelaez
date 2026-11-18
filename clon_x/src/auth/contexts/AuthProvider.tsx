@@ -7,13 +7,18 @@ import { useEffect, useReducer, type ReactNode } from "react";
 import { FirebaseAuth } from "../../firebase/config";
 import {
   loginUserByCredentials,
+  loginUserByGoogleProvider,
   registerUserByCredentials,
 } from "../../firebase/providers";
 import { ensureProfile, saveProfile } from "../../firebase/profiles";
 import { AuthContext, type RegisterData } from "./AuthContext";
 import { ACTION_TYPES } from "../reducers/actionTypes";
 import { authReducer } from "../reducers/authReducer";
-import type { AuthState, AuthUser } from "../types/authReducerInterfaces";
+import type {
+  AuthReducerAction,
+  AuthState,
+  AuthUser,
+} from "../types/authReducerInterfaces";
 
 const initialState: AuthState = {
   logged: false,
@@ -88,7 +93,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return true;
   };
 
-  const register = async (data: RegisterData): Promise<boolean> => {
+  const loginWithGoogle = async (): Promise<boolean> => {
+    const result = await loginUserByGoogleProvider();
+
+    if (!result.ok) {
+      const action: AuthReducerAction = {
+        type: ACTION_TYPES.error,
+        payload: result.errorMessage,
+      };
+
+      dispatch(action);
+
+      return false;
+    }
+
+    const { uid, displayName, email, photoURL } = result;
+
+    const user: AuthUser = {
+      uid,
+      email,
+      photoURL,
+      username: displayName || email.split("@")[0],
+    };
+
+    const action: AuthReducerAction = {
+      type: ACTION_TYPES.login,
+      payload: user,
+    };
+
+    dispatch(action);
+
+    return true;
+  };
+
+  const register =async (data: RegisterData): Promise<boolean> => {
     dispatch({ type: ACTION_TYPES.loading });
     const displayName = `${data.firstName} ${data.lastName}`.trim();
     const result = await registerUserByCredentials(
@@ -162,7 +200,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ authState, login, register, logout, updatePhotoURL }}
+      value={{
+        authState,
+        login,
+        loginWithGoogle,
+        register,
+        logout,
+        updatePhotoURL,
+      }}
     >
       {children}
     </AuthContext.Provider>
