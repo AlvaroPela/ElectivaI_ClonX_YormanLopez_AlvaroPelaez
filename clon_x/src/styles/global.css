@@ -1001,3 +1001,32 @@ a {
     gap: 14px;
   }
 }
+
+.x-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  z-index: 1100;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--x-blue);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: x-toast-in 0.2s ease-out;
+}
+
+@keyframes x-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .x-toast {
+    bottom: 72px;
+    max-width: calc(100% - 32px);
+  }
+}

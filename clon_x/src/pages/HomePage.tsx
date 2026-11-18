@@ -7,7 +7,10 @@ import {
   watchProfileSuggestions,
   type Profile,
 } from "../firebase/profiles";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PostCard } from "../posts/components/PostCard";
+import { POST_MESSAGES } from "../posts/helpers/postMessages";
+import { SuccessToast } from "../ui/components/SuccessToast";
 import { XIcon } from "../ui/components/XIcon";
 
 const trends = [
@@ -20,6 +23,18 @@ const trends = [
   { category: "Tendencia", name: "Lo que está pasando", posts: "4.105 posts" },
 ];
 
+interface Notice {
+  id: number;
+  text: string;
+}
+
+const getNoticeFromState = (state: unknown): Notice | null => {
+  const message = (state as { notice?: unknown } | null)?.notice;
+  if (typeof message !== "string") return null;
+
+  return { id: Date.now(), text: message };
+};
+
 export const HomePage = () => {
   const { authState } = useContext(AuthContext);
   const user = authState.user!;
@@ -31,6 +46,17 @@ export const HomePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
   const [pageError, setPageError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  // NewPostPage sends the success message in the navigation state.
+  const [notice, setNotice] = useState<Notice | null>(() =>
+    getNoticeFromState(location.state),
+  );
+
+  // Removes the message from the history so it doesn't appear again on reload.
+  useEffect(() => {
+    if (location.state) navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   const fullName = user.fullName || "Usuario";
   const initials = fullName.charAt(0).toUpperCase();
@@ -123,6 +149,7 @@ export const HomePage = () => {
         text,
       );
       setDraft("");
+      setNotice({ id: Date.now(), text: POST_MESSAGES.published });
     } catch (error) {
       setPageError(
         `No se pudo publicar: ${error instanceof Error ? error.message : "error desconocido"}`,
@@ -274,6 +301,8 @@ export const HomePage = () => {
           )}
         </section>
       </aside>
+
+      {notice && <SuccessToast key={notice.id} message={notice.text} />}
     </>
   );
 };
