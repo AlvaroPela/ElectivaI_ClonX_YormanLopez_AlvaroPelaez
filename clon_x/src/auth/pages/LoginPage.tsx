@@ -10,7 +10,7 @@ interface LoginLocationState {
 }
 
 export const LoginPage = () => {
-  const { authState, login } = useContext(AuthContext);
+  const { authState, login, loginWithGoogle } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -30,6 +30,16 @@ export const LoginPage = () => {
     if (success) {
       const state = location.state as LoginLocationState | null;
       navigate(state?.from?.pathname || "/", { replace: true });
+    }
+  };
+
+  const onGoogleSignIn = async () => {
+    setSubmitting(true);
+    const result = await loginWithGoogle();
+    setSubmitting(false);
+
+    if (result) {
+      navigate("/", { replace: true });
     }
   };
 
@@ -76,6 +86,17 @@ export const LoginPage = () => {
             {submitting ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>
         </form>
+
+        <p className="auth-divider">o</p>
+
+        <button
+          type="button"
+          className="auth-button auth-button-outline"
+          disabled={submitting || authState.loading}
+          onClick={onGoogleSignIn}
+        >
+          Iniciar sesión con Google
+        </button>
 
         <p className="auth-footer">
           ¿No tienes una cuenta? <Link to="/register">Regístrate</Link>
