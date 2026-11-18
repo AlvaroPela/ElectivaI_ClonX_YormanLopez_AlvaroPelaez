@@ -41,8 +41,8 @@ export const HomePage = () => {
   const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
   const [pageError, setPageError] = useState<string | null>(null);
 
-  const username = user.username || "Usuario";
-  const initials = username.charAt(0).toUpperCase();
+  const fullName = user.fullName || "Usuario";
+  const initials = fullName.charAt(0).toUpperCase();
   const visiblePosts = useMemo(
     () =>
       activeTab === "for-you"
@@ -127,8 +127,8 @@ export const HomePage = () => {
     try {
       await publishPost(
         user.uid,
-        username,
-        `@${user.email.split("@")[0]}`,
+        fullName,
+        `@${user.username}`,
         text,
       );
       setDraft("");
