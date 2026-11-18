@@ -9,6 +9,8 @@ import { NotificationsPage } from "../pages/NotificationsPage";
 import { NewPostPage } from "../posts/pages/NewPostPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { RegisterPage } from "../auth/pages/RegisterPage";
+import { FollowListPage } from "../users/pages/FollowListPage";
+import { UserPage } from "../users/pages/UserPage";
 
 const PrivateRoutes = () => {
   const { authState } = useContext(AuthContext);
@@ -46,6 +48,15 @@ export const BaseRouter = () => (
       <Route path="/history" element={<HistoryPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/new-post" element={<NewPostPage />} />
+      <Route path="/user/:username" element={<UserPage />} />
+      <Route
+        path="/user/:username/following"
+        element={<FollowListPage type="following" />}
+      />
+      <Route
+        path="/user/:username/followers"
+        element={<FollowListPage type="followers" />}
+      />
     </Route>
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>

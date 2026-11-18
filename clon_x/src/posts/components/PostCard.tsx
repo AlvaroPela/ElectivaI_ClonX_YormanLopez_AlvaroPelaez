@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { FeedPost } from "../../firebase/feed";
 import { XIcon, type XIconName } from "../../ui/components/XIcon";
 import { formatPostDate } from "../helpers/formatPostDate";
@@ -23,7 +24,9 @@ export const PostCard = ({ post }: PostCardProps) => (
     <div className="x-post-body">
       <div className="x-post-heading">
         <p className="x-post-meta">
-          <strong>{post.author}</strong>, <span>{post.handle}</span>
+          <Link to={`/user/${post.uid}`} className="x-post-author">
+            <strong>{post.author}</strong>, <span>{post.handle}</span>
+          </Link>
           <span> - </span>
           <time dateTime={post.createdAt?.toISOString()}>
             {formatPostDate(post.createdAt)}
