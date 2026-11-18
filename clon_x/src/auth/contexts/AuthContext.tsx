@@ -13,7 +13,7 @@ export interface RegisterData {
 
 interface AuthContextValueObject {
   authState: AuthState;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (identifier: string, password: string) => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => Promise<void>;

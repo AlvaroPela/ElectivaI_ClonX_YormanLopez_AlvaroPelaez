@@ -67,6 +67,9 @@ export const RegisterPage = () => {
               <span>Usuario</span>
               <input
                 autoComplete="username"
+                placeholder="ej: alvaro_p"
+                minLength={3}
+                maxLength={15}
                 required
                 value={form.username}
                 onChange={(event) => updateField("username", event.target.value)}

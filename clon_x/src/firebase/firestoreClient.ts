@@ -8,6 +8,7 @@ export const loadFirestore = async () => {
     collection: firestore.collection,
     doc: firestore.doc,
     db: firestore.getFirestore(FirebaseApp),
+    getDoc: firestore.getDoc,
     getDocs: firestore.getDocs,
     limit: firestore.limit,
     onSnapshot: firestore.onSnapshot,

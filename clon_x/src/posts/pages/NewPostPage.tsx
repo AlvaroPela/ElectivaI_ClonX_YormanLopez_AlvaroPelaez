@@ -21,8 +21,8 @@ export const NewPostPage = () => {
 
     const post: Post = {
       uid: user.uid,
-      author: user.username,
-      handle: `@${user.email.split("@")[0]}`,
+      author: user.fullName,
+      handle: `@${user.username}`,
       text: text.trim(),
       createdAt: new Date(),
     };

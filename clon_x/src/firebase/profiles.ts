@@ -17,9 +17,44 @@ export interface Profile extends ProfileInput {
 }
 
 const userCollection = "users";
+const usernameCollection = "usernames";
+const usernamePattern = /^[a-z0-9_]{3,15}$/;
+const generatedUsernameLength = 11;
 
-const normalizeHandle = (username: string) =>
+export const normalizeUsername = (username: string) =>
   username.trim().replace(/^@/, "").replace(/\s+/g, "").toLowerCase();
+
+export const isValidUsername = (username: string) =>
+  usernamePattern.test(normalizeUsername(username));
+
+// Builds a valid username from free text (for example the email of a Google account).
+const toUsernameCandidate = (text: string) => {
+  const candidate = normalizeUsername(text)
+    .replace(/[^a-z0-9_]/g, "")
+    .slice(0, generatedUsernameLength);
+
+  return candidate.length >= 3 ? candidate : "usuario";
+};
+
+export const isUsernameAvailable = async (username: string) => {
+  const { db, doc, getDoc } = await loadFirestore();
+  const usernameRef = doc(db, usernameCollection, normalizeUsername(username));
+  const snapshot = await getDoc(usernameRef);
+
+  return !snapshot.exists();
+};
+
+export const findEmailByUsername = async (
+  username: string,
+): Promise<string | null> => {
+  const { db, doc, getDoc } = await loadFirestore();
+  const usernameRef = doc(db, usernameCollection, normalizeUsername(username));
+  const snapshot = await getDoc(usernameRef);
+
+  if (!snapshot.exists()) return null;
+
+  return String(snapshot.data().email || "") || null;
+};
 
 const parseProfile = (
   uid: string,
@@ -32,7 +67,7 @@ const parseProfile = (
     typeof data.handle === "string"
       ? data.handle
       : typeof data.username === "string"
-        ? normalizeHandle(data.username)
+        ? normalizeUsername(data.username)
         : "usuario",
   firstName: typeof data.firstName === "string" ? data.firstName : undefined,
   lastName: typeof data.lastName === "string" ? data.lastName : undefined,
@@ -48,31 +83,58 @@ const parseProfile = (
       : undefined,
 });
 
-export const ensureProfile = async (profile: ProfileInput) => {
+// Returns the stored profile. If the account has no profile yet (first Google login),
+// it creates one and reserves a free username built from profile.username.
+export const ensureProfile = async (profile: ProfileInput): Promise<Profile> => {
   const { db, doc, runTransaction, serverTimestamp } = await loadFirestore();
   const profileRef = doc(db, userCollection, profile.uid);
+  const candidate = toUsernameCandidate(profile.username);
+  const alternative = `${candidate}${profile.uid.slice(0, 4).toLowerCase()}`;
+  const candidateRef = doc(db, usernameCollection, candidate);
 
-  await runTransaction(db, async (transaction) => {
+  return runTransaction(db, async (transaction) => {
     const snapshot = await transaction.get(profileRef);
-    if (!snapshot.exists()) {
-      transaction.set(profileRef, {
-        ...profile,
-        handle: normalizeHandle(profile.username),
-        createdAt: serverTimestamp(),
-      });
-    }
+    if (snapshot.exists()) return parseProfile(snapshot.id, snapshot.data());
+
+    const candidateSnapshot = await transaction.get(candidateRef);
+    const username = candidateSnapshot.exists() ? alternative : candidate;
+    const newProfile: Profile = { ...profile, username, handle: username };
+
+    transaction.set(doc(db, usernameCollection, username), {
+      uid: profile.uid,
+      email: profile.email,
+    });
+    transaction.set(profileRef, { ...newProfile, createdAt: serverTimestamp() });
+
+    return newProfile;
   });
 };
 
+// Saves the profile of a new account and reserves its username.
+// Throws an error if the username already belongs to another account.
 export const saveProfile = async (profile: ProfileInput) => {
   const { db, doc, runTransaction, serverTimestamp } = await loadFirestore();
+  const username = normalizeUsername(profile.username);
   const profileRef = doc(db, userCollection, profile.uid);
+  const usernameRef = doc(db, usernameCollection, username);
 
   await runTransaction(db, async (transaction) => {
     const snapshot = await transaction.get(profileRef);
+    const usernameSnapshot = await transaction.get(usernameRef);
+    const usernameOwner = usernameSnapshot.data()?.uid;
+
+    if (usernameOwner && usernameOwner !== profile.uid) {
+      throw new Error("Ese nombre de usuario ya está en uso.");
+    }
+
+    if (!usernameOwner) {
+      transaction.set(usernameRef, { uid: profile.uid, email: profile.email });
+    }
+
     const profileData = {
       ...profile,
-      handle: normalizeHandle(profile.username),
+      username,
+      handle: username,
       updatedAt: serverTimestamp(),
     };
 
@@ -108,7 +170,7 @@ export const saveProfileImage = async (
     } else {
       transaction.set(profileRef, {
         ...profile,
-        handle: normalizeHandle(profile.username),
+        handle: normalizeUsername(profile.username),
         ...imageData,
         createdAt: serverTimestamp(),
       });
